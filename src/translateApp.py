@@ -32,7 +32,7 @@ class Application:
         self.text_source.grid(row = 1,column = 1,columnspan=3,rowspan =2,padx=10,pady=10)
 
     def createTargetText(self):
-        self.text_target = Text(self.frame,height = "8",width = 40)
+        self.text_target = Text(self.frame,height = "16",width = 40)
         self.text_target.grid(row = 1,column = 8,columnspan=3,rowspan =1,padx=10,pady=0)
         #self.text_target.configure(state="disabled")
 
