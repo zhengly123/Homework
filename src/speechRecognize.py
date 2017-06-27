@@ -7,6 +7,7 @@ import baiduSpeechRecognize
 def recordAndRecognize(language,time=5):
     WAVE_FILENAME="output.wav"
     voiceRecord.record(WAVE_FILENAME,time)
+    print('Start recognizing')
     return baiduSpeechRecognize.wav_to_text(WAVE_FILENAME,language)
 
 #Test

@@ -2,7 +2,7 @@
 from tkinter import *
 import tkinter.messagebox
 from translateService import *
-
+import speechRecognize
 class Application:
 
     WINDOW_WIDTH = 800
@@ -70,12 +70,16 @@ class Application:
     def sayChineseListener(self,event):
         self.text_source.delete(0.0, END)
         self.text_target.delete(0.0, END)
-        self.text_source.insert(0.0, '中国')
+        #录音时长为5秒
+        source=speechRecognize.recordAndRecognize("zh",5)
+        self.text_source.insert(0.0, source)
 
 
     def sayEnglishListener(self,event):
         self.text_source.delete(0.0, END)
         self.text_target.delete(0.0, END)
-        self.text_source.insert(0.0, 'china')
+        #录音时长为5秒
+        source=speechRecognize.recordAndRecognize("en",5)
+        self.text_source.insert(0.0, source)
 
 frame = Application()
