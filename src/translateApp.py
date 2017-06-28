@@ -2,7 +2,7 @@
 from tkinter import *
 import tkinter.messagebox
 from translateService import *
-import speechRecognize
+from speechRecognize import *
 class Application:
 
     WINDOW_WIDTH = 800
@@ -12,6 +12,7 @@ class Application:
     def __init__(self):
         self.frame = Tk()
         self.__service = TranslateService()
+        self.__speech = SpeechRecognize()
         self.frame.title(Application.TITLE)
         self.frame.maxsize(Application.WINDOW_WIDTH, Application.WINDOW_HEIGHT)
         self.frame.minsize(Application.WINDOW_WIDTH, Application.WINDOW_HEIGHT)
@@ -41,10 +42,15 @@ class Application:
         self.button_say_english = Button(self.frame,text = "say english",width = 10)
         self.button_translate = Button(self.frame,text = "auto translation",width = 20)
         self.button_clear = Button(self.frame,text = "clear",width = 10)
+
+        self.var1 = IntVar()
+        self.button_check = Checkbutton(self.frame,variable = self.var1,text = "auto translation",width = 20)
+        self.button_check.select()
         self.button_say_chinese.grid(row = 0,column = 1,padx=5,pady=5)
         self.button_say_english.grid(row = 0,column = 2,padx=0,pady=5)
         self.button_translate.grid(row = 1,column = 4)
         self.button_clear.grid(row = 0,column = 3)
+        self.button_check.grid(row = 0,column = 4)
         self.button_translate.bind("<ButtonRelease-1>",self.translateListener)
         self.button_clear.bind("<ButtonRelease-1>",self.clearListener)
         self.button_say_chinese.bind("<ButtonRelease-1>",self.sayChineseListener)
@@ -57,29 +63,65 @@ class Application:
         if sourceContent.strip()=="":
             tkinter.messagebox.showinfo("messagebox","The left text cannot be empty ! ")
             return
-        result = self.__service.translate(sourceContent)
-        self.text_target.delete(0.0, END)
-        self.text_target.insert(0.0, result)
+
+        #Translating
+        self.button_translate['state'] = DISABLED
+        self.button_translate.config(text='translating ...')
+        self.__service.translate(sourceContent,self.callbackTarget)
+
+
 
     # clear text info
     def clearListener(self,event):
         self.text_source.delete(0.0, END)
         self.text_target.delete(0.0, END)
 
-
     def sayChineseListener(self,event):
         self.text_source.delete(0.0, END)
         self.text_target.delete(0.0, END)
+        self.button_say_chinese['state'] = DISABLED
+        self.button_say_english['state'] = DISABLED
+        self.__speech.recordAndRecognize("zh",self.callbackSpeech,5)
         #录音时长为5秒
-        source=speechRecognize.recordAndRecognize("zh",5)
-        self.text_source.insert(0.0, source)
+        #source=speechRecognize.recordAndRecognize("zh",5)
+        #self.text_source.insert(0.0, source)
 
 
     def sayEnglishListener(self,event):
         self.text_source.delete(0.0, END)
         self.text_target.delete(0.0, END)
+        self.button_say_chinese['state'] = DISABLED
+        self.button_say_english['state'] = DISABLED
+        self.__speech.recordAndRecognize("en",self.callbackSpeech,5)
         #录音时长为5秒
-        source=speechRecognize.recordAndRecognize("en",5)
-        self.text_source.insert(0.0, source)
+        #source=speechRecognize.recordAndRecognize("en",5)
+        #self.text_source.insert(0.0, source)
+
+
+
+        # call back when get result
+    def callbackTarget(self,content):
+        self.text_target.delete(0.0, END)
+        self.text_target.insert(0.0, content)
+        self.button_translate['state'] = ACTIVE
+        self.button_translate.config(text='auto translation')
+
+
+    def callbackSpeech(self,language,result):
+        self.button_say_chinese['state'] = ACTIVE
+        self.button_say_english['state'] = ACTIVE
+        self.text_source.insert(0.0, result)
+
+        status = self.var1.get()
+        #Translating
+        if status == 1:
+            self.button_translate['state'] = DISABLED
+            self.button_translate.config(text='translating ...')
+            sourceContent = self.text_source.get(0.0,END)
+            if sourceContent.strip()=="":
+               print('The left text cannot be empty !')
+            else:
+                self.__service.translate(sourceContent,self.callbackTarget)
+
 
 frame = Application()

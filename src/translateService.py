@@ -1,12 +1,13 @@
 # -*- coding: UTF-8 -*-
 from urllib import request
 from urllib import parse
+import threading
 import json
 
-class TranslateService:
+class TranslateService(threading.Thread):
 
-    #auto translation
-    def translate(self,content):
+
+    def worker(self,content,callbackTarget):
         #print('hello world' + content)
         Request_URL = 'http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=https://www.baidu.com/link'
         #创建Form_Data字典，存储上图的Form Data
@@ -33,4 +34,14 @@ class TranslateService:
         translate_result = translate_results['translateResult'][0][0]['tgt']
 
         #smart = translate_results['smartResult']['entries']
-        return translate_result
+
+        callbackTarget(translate_result)
+
+
+
+
+    #auto translation
+    def translate(self,content,callbackTarget):
+        t = threading.Thread(target=self.worker,args=(content,callbackTarget))
+        t.start()
+
